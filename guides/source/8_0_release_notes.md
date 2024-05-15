@@ -11,7 +11,7 @@ Upgrading to Rails 8.0
 ----------------------
 
 If you're upgrading an existing application, it's a great idea to have good test
-coverage before going in. You should also first upgrade to Rails 7.1 in case you
+coverage before going in. You should also first upgrade to Rails 7.2 in case you
 haven't and make sure your application still runs as expected before attempting
 an update to Rails 8.0. A list of things to watch out for when upgrading is
 available in the
