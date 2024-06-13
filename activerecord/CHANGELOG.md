@@ -1,3 +1,19 @@
+*   Add a `filter` option to `in_order_of` to prioritize certain values in the sorting without filtering the results
+    by these values.
+
+    *Igor Depolli*
+
+*   Fix an issue where the IDs reader method did not return expected results
+    for preloaded associations in models using composite primary keys.
+
+    *Jay Ang*
+
+*   Allow to configure `strict_loading_mode` globally or within a model.
+
+    Defaults to `:all`, can be changed to `:n_plus_one_only`.
+
+    *Garen Torikian*
+
 *   Add `ActiveRecord::Relation#readonly?`.
 
     Reflects if the relation has been marked as readonly.

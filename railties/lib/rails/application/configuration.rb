@@ -15,7 +15,7 @@ module Rails
                     :cache_classes, :cache_store, :consider_all_requests_local, :console,
                     :eager_load, :exceptions_app, :file_watcher, :filter_parameters, :precompile_filter_parameters,
                     :force_ssl, :helpers_paths, :hosts, :host_authorization, :logger, :log_formatter,
-                    :log_tags, :railties_order, :relative_url_root, :secret_key_base,
+                    :log_tags, :railties_order, :relative_url_root,
                     :ssl_options, :public_file_server,
                     :session_options, :time_zone, :reload_classes_only_on_change,
                     :beginning_of_week, :filter_redirect, :x,
@@ -113,6 +113,8 @@ module Rails
             action_controller.per_form_csrf_tokens = true
             action_controller.forgery_protection_origin_check = true
           end
+
+          ActiveSupport.to_time_preserves_timezone = true
 
           if respond_to?(:active_record)
             active_record.belongs_to_required_by_default = true
@@ -308,12 +310,12 @@ module Rails
           end
 
           if respond_to?(:action_view)
-            require "rails-html-sanitizer"
+            require "action_view/helpers"
             action_view.sanitizer_vendor = Rails::HTML::Sanitizer.best_supported_vendor
           end
 
           if respond_to?(:action_text)
-            require "rails-html-sanitizer"
+            require "action_view/helpers"
             action_text.sanitizer_vendor = Rails::HTML::Sanitizer.best_supported_vendor
           end
         when "7.2"
@@ -498,6 +500,26 @@ module Rails
         generators.colorize_logging = val
       end
 
+      def secret_key_base
+        @secret_key_base || begin
+          self.secret_key_base = if Rails.env.local? || ENV["SECRET_KEY_BASE_DUMMY"]
+            generate_local_secret
+          else
+            ENV["SECRET_KEY_BASE"] || Rails.application.credentials.secret_key_base
+          end
+        end
+      end
+
+      def secret_key_base=(new_secret_key_base)
+        if new_secret_key_base.is_a?(String) && new_secret_key_base.present?
+          @secret_key_base = new_secret_key_base
+        elsif new_secret_key_base
+          raise ArgumentError, "`secret_key_base` for #{Rails.env} environment must be a type of String`"
+        else
+          raise ArgumentError, "Missing `secret_key_base` for '#{Rails.env}' environment, set this string with `bin/rails credentials:edit`"
+        end
+      end
+
       # Specifies what class to use to store the session. Possible values
       # are +:cache_store+, +:cookie_store+, +:mem_cache_store+, a custom
       # store, or +:disabled+. +:disabled+ tells \Rails not to deal with
@@ -602,6 +624,18 @@ module Rails
           key_path = root.join("config/master.key") if !key_path.exist?
 
           { content_path: content_path, key_path: key_path }
+        end
+
+        def generate_local_secret
+          key_file = root.join("tmp/local_secret.txt")
+
+          unless File.exist?(key_file)
+            random_key = SecureRandom.hex(64)
+            FileUtils.mkdir_p(key_file.dirname)
+            File.binwrite(key_file, random_key)
+          end
+
+          File.binread(key_file)
         end
     end
   end
