@@ -260,6 +260,9 @@ module ActionController
     # `:stale_if_error`
     # :   Sets the value of the `stale-if-error` directive.
     #
+    # `:immutable`
+    # :   If true, adds the `immutable` directive.
+    #
     #
     # Any additional key-value pairs are concatenated as directives. For a list of
     # supported `Cache-Control` directives, see the [article on
@@ -293,6 +296,7 @@ module ActionController
         must_revalidate: options.delete(:must_revalidate),
         stale_while_revalidate: options.delete(:stale_while_revalidate),
         stale_if_error: options.delete(:stale_if_error),
+        immutable: options.delete(:immutable),
       )
       options.delete(:private)
 
